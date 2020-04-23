@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WebApplication3.MongoDBHelper;
 
 namespace WebApplication3
 {
@@ -70,6 +71,8 @@ namespace WebApplication3
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
+
+            MongoDBHelperSingleton.InitializeSingleton();
         }
     }
 }
