@@ -10,7 +10,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using WebApplication3.MongoDBHelper;
 
-namespace UgandaProjectTest.Controllers
+namespace WebApplication3.Controllers
 {
     [Route("[controller]")]
     [ApiController]
