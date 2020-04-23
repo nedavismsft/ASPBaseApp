@@ -11,7 +11,7 @@ using MongoDB.Driver;
 using System.Linq.Expressions;
 using WebApplication3.MongoDBHelper;
 
-namespace UgandaProjectTest.Controllers
+namespace WebApplication3.Controllers
 {
     [Route("[controller]")]
     [ApiController]
