@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Xsl;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.EventLog;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WebApplication3.MongoDBHelper;
@@ -16,15 +19,24 @@ namespace WebApplication3.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        public AuthenticationController()
+        ILogger<AuthenticationController> _logger;
+        public AuthenticationController(ILogger<AuthenticationController> logger)
         {
+            _logger = logger;
         }
 
         [HttpPost("signin")]
-        public object SignIn([FromBody] SignInPayload input)
+        public object SignIn([FromBody] SignInInput input)
         {
+            Guid xcv = Guid.NewGuid();
+
             try
             {
+                using (_logger.BeginScope(new Dictionary<string, object>() { { "xcv", xcv } }))
+                {
+                    _logger.LogError(new Exception(), "An error occurred");
+                }
+
                 FilterDefinition<BsonDocument>[] filters = new FilterDefinition<BsonDocument>[]
                     { Builders<BsonDocument>.Filter.Eq("email", input.email),
                     Builders<BsonDocument>.Filter.Eq("password", input.password)};
@@ -33,6 +45,10 @@ namespace WebApplication3.Controllers
 
                 if (userRecords.Count == 0)
                 {
+                    using (_logger.BeginScope(new Dictionary<string, object>() { { "xcv", xcv }, { "errorCode", "404" } }))
+                    {
+                        _logger.LogWarning("User doesn't exist");
+                    }
                     return new
                     {
                         success = false,
@@ -40,6 +56,11 @@ namespace WebApplication3.Controllers
                         errorCode = "404"
                     };
                 }
+                var objectTest = new
+                {
+                    success = true,
+                    data = new { userId = userRecords[0].GetValue("_id").AsString, signInComplete = true }
+                };
 
                 return new
                 {
@@ -49,6 +70,11 @@ namespace WebApplication3.Controllers
             }
             catch (Exception e)
             {
+                using (_logger.BeginScope(new Dictionary<string, object>()
+                    { { "xcv", xcv }, { "message", e.Message }, { "errorCode", "500" } }))
+                {
+                    _logger.LogError(e, "Started Sign In");
+                }
                 return new
                 {
                     success = true,
@@ -59,7 +85,7 @@ namespace WebApplication3.Controllers
         }
     }
 
-    public class SignInPayload
+    public class SignInInput
     {
         public string email { get; set; }
         public string password { get; set; }

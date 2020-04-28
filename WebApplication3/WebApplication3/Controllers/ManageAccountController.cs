@@ -17,8 +17,11 @@ namespace WebApplication3.Controllers
     [ApiController]
     public class ManageAccountController : ControllerBase
     {
-        public ManageAccountController()
+
+        private readonly ILogger<ManageAccountController> _logger;
+        public ManageAccountController(ILogger<ManageAccountController> logger)
         {
+            _logger = logger;
         }
 
         [HttpPost("{id?}/deposit")]
@@ -28,9 +31,15 @@ namespace WebApplication3.Controllers
             Dictionary<string, object> fieldsToUpdate = new Dictionary<string, object>();
             fieldsToUpdate.Add("balance", newBalance);
             fieldsToUpdate.Add("modifiedDate", DateTime.UtcNow.ToString());
+            string xcv = Guid.NewGuid().ToString();
 
             try
             {
+                using (_logger.BeginScope(new Dictionary<string, object>() { { "xcv", xcv } }))
+                {
+                    _logger.LogInformation("Started Deposit");
+                }
+
                 BsonDocument result = MongoDBHelperSingleton.instance.GetRecordAndUpdate(input.accountId, fieldsToUpdate, "AccountCollection");
                 if (result != null)
                 {
@@ -42,15 +51,26 @@ namespace WebApplication3.Controllers
                 }
                 else
                 {
+                    using (_logger.BeginScope(new Dictionary<string, object>()
+                    { { "xcv", xcv }, { "message", "Unexpected error updating the record" }, { "errorCode", "500" } }))
+                    {
+                        _logger.LogError(new Exception(), "Unexpected exception in updating the record");
+                    }
                     return new
                     {
                         success = false,
-                        message = "Unexpected error updating the record"
+                        message = "Unexpected error updating the record",
+                        errorCode = "500"
                     };
                 }
             }
             catch (Exception e)
             {
+                using (_logger.BeginScope(new Dictionary<string, object>()
+                    { { "xcv", xcv }, { "message", e.Message }, { "errorCode", "500" } }))
+                {
+                    _logger.LogError(e, "Unexpected exception in depositing balance");
+                }
                 return new
                 {
                     success = false,

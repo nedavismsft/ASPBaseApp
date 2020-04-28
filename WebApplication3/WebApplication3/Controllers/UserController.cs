@@ -7,6 +7,8 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using WebApplication3.Models;
 using MongoDB.Bson.Serialization;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using WebApplication3.MongoDBHelper;
 
 namespace WebApplication3.Controllers
@@ -15,18 +17,26 @@ namespace WebApplication3.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        public UserController()
+        private ILogger<UserController> _logger;
+        public UserController(ILogger<UserController> logger)
         {
+            _logger = logger;
         }
 
         [HttpPost("adduser")]
-        public object AddUser([FromBody] AddUserPayload input)
+        public object AddUser([FromBody] AddUserInput input)
         {
             string timeCreated = DateTime.UtcNow.ToString();
             string userId = Guid.NewGuid().ToString();
+            string xcv = Guid.NewGuid().ToString();
 
             try
             {
+                using (_logger.BeginScope(new Dictionary<string, object>() { { "xcv", xcv } }))
+                {
+                    _logger.LogInformation("Started user creation");
+                }
+
                 FilterDefinition<BsonDocument>[] filters = new FilterDefinition<BsonDocument>[]
                 { Builders<BsonDocument>.Filter.Eq("email", input.email) };
                 var userRecord = MongoDBHelperSingleton.instance.GetRecords("UserCollection", filters);
@@ -47,8 +57,6 @@ namespace WebApplication3.Controllers
                     createdDate = timeCreated,
                     modifiedDate = timeCreated
                 };
-
-
 
                 Account newAccount = new Account
                 {
@@ -71,6 +79,7 @@ namespace WebApplication3.Controllers
                 recordExists = MongoDBHelperSingleton.instance.CreateRecord(accountAsBson, "AccountCollection");
                 if (recordExists)
                 {
+
                     return new { success = false, message = "Record already exists. Please try a new email" };
                 }
             }
@@ -88,9 +97,15 @@ namespace WebApplication3.Controllers
         {
             FilterDefinition<BsonDocument>[] filters = new FilterDefinition<BsonDocument>[]
                 { Builders<BsonDocument>.Filter.Eq("userId", id) };
+            string xcv = Guid.NewGuid().ToString();
 
             try
             {
+                using (_logger.BeginScope(new Dictionary<string, object>()
+                    { { "xcv", xcv }, { "userId", id } }))
+                {
+                    _logger.LogInformation("Started obtaining user's account information");
+                }
                 List<BsonDocument> accountRecordsMongo = MongoDBHelperSingleton.instance.GetRecords("AccountCollection", filters);
 
                 List<Account> accountRecords = new List<Account>();
@@ -123,7 +138,7 @@ namespace WebApplication3.Controllers
         }
     }
 
-    public class AddUserPayload
+    public class AddUserInput
     {
         public string username { get; set; }
         public string password { get; set; }
