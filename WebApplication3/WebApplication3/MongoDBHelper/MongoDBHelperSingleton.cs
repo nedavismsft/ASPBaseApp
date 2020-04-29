@@ -10,9 +10,9 @@ using MongoDB.Driver;
 
 namespace WebApplication3.MongoDBHelper
 {
-    public class MongoDBHelperSingleton
+    public class MongoDBHelperSingleton : IMongoDBHelperSingleton
     {
-        public static MongoDBHelperSingleton instance = null;
+        public static IMongoDBHelperSingleton instance = null;
         private MongoClient client;
         private string password;
         private string userName;
