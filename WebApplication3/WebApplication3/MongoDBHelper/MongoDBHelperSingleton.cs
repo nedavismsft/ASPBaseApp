@@ -23,10 +23,10 @@ namespace WebApplication3.MongoDBHelper
         {
             AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
             KeyVaultClient keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-            password = keyVaultClient.GetSecretAsync("https://myskills-keyvault.vault.azure.net/secrets/DBPassword").Result.Value;
-            userName = keyVaultClient.GetSecretAsync("https://myskills-keyvault.vault.azure.net/secrets/DBUserName").Result.Value;
-            host = keyVaultClient.GetSecretAsync("https://myskills-keyvault.vault.azure.net/secrets/DBHost").Result.Value;
-            dbName = keyVaultClient.GetSecretAsync("https://myskills-keyvault.vault.azure.net/secrets/DBName").Result.Value;
+            password = keyVaultClient.GetSecretAsync("<insert your keyvault URI>/secrets/DBPassword").Result.Value;
+            userName = keyVaultClient.GetSecretAsync("<insert your keyvault URI>/secrets/DBUserName").Result.Value;
+            host = keyVaultClient.GetSecretAsync("<insert your keyvault URI>/secrets/DBHost").Result.Value;
+            dbName = keyVaultClient.GetSecretAsync("<insert your keyvault URI>/secrets/DBName").Result.Value;
 
             MongoClientSettings settings = new MongoClientSettings();
             settings.Server = new MongoServerAddress(host, 10255);

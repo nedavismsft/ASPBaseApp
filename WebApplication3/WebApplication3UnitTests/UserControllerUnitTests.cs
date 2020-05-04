@@ -47,7 +47,7 @@ namespace WebApplication3UnitTests
             object result = userController.AddUser(input);
             var jsonToReturn = JObject.FromObject(result);
 
-            Assert.True(jsonToReturn.Value<bool>("success"));
+            Assert.True(jsonToReturn.Value<bool>("success"), "Oh it failed");
         }
 
         [Fact]

@@ -26,9 +26,9 @@ namespace WebApplication3
                 })
             .ConfigureLogging(loggingBuilder => {
 
-                AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
+                AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider("RunAs=Developer;DeveloperTool=VisualStudio");
                 KeyVaultClient keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-                var appInsightsInstrumentationKey = keyVaultClient.GetSecretAsync("https://myskills-keyvault.vault.azure.net/secrets/AppInsightsInstrumentationKey").Result.Value;
+                var appInsightsInstrumentationKey = keyVaultClient.GetSecretAsync("<insert your keyvault URI>/secrets/AppInsightsInstrumentationKey").Result.Value;
 
                 loggingBuilder.AddApplicationInsights(appInsightsInstrumentationKey);
                 loggingBuilder.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>("", LogLevel.Information);
